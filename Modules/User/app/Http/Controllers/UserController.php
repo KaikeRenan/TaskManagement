@@ -3,54 +3,48 @@
 namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Modules\User\Http\Requests\UserStoreRequest;
+use Modules\User\Http\Requests\UserUpdateRequest;
+use Modules\User\Services\UserService;
+use Modules\User\Transformers\UserCollection;
+use Modules\User\Transformers\UserResource;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        protected UserService $userService
+    )
+    {
+    }
+
     public function index()
     {
-        return view('user::index');
+        $users = $this->userService->getAll();
+        return new UserCollection($users);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(int $user)
     {
-        return view('user::create');
+        $user = $this->userService->getById($user);
+        return new UserResource($user);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function store(UserStoreRequest $request)
     {
-        return view('user::show');
+        $user = $this->userService->create($request->validated());
+        return new UserResource($user);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(UserUpdateRequest $request, int $user)
     {
-        return view('user::edit');
+        $user = $this->userService->update($user, $request->validated());
+        return new UserResource($user);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+    public function destroy(int $user)
+    {
+        $this->userService->delete($user);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+        return response()->noContent();
+    }
 }
