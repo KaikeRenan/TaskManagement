@@ -3,54 +3,48 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Modules\Project\Http\Requests\ProjectStoreRequest;
+use Modules\Project\Http\Requests\ProjectUpdateRequest;
+use Modules\Project\Services\ProjectService;
+use Modules\Project\Transformers\ProjectCollection;
+use Modules\Project\Transformers\ProjectResource;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        protected ProjectService $projectService
+    )
+    {
+    }
+
     public function index()
     {
-        return view('project::index');
+        $projects = $this->projectService->getAll();
+        return new ProjectCollection($projects);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(int $project)
     {
-        return view('project::create');
+        $project = $this->projectService->getById($project);
+        return new ProjectResource($project);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function store(ProjectStoreRequest $request)
     {
-        return view('project::show');
+        $project = $this->projectService->create($request->validated());
+        return new ProjectResource($project);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(ProjectUpdateRequest $request, int $project)
     {
-        return view('project::edit');
+        $project = $this->projectService->update($project, $request->validated());
+        return new ProjectResource($project);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+    public function destroy(int $project)
+    {
+        $this->projectService->delete($project);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+        return response()->noContent();
+    }
 }
