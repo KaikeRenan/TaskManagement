@@ -14,6 +14,7 @@ class Project extends Model
     protected $fillable = [
         'name',
         'description',
+        'user_id',
     ];
 
     // N:1 relationships with users
@@ -25,12 +26,12 @@ class Project extends Model
     // 1:N relationships with tasks and categories
     public function tasks()
     {
-        return $this->hasMany(Task::class, 'project_id', 'id');
+        return $this->hasMany(Task::class);
     }
 
     public function categories()
     {
-        return $this->hasMany(Category::class, 'project_id', 'id');
+        return $this->hasMany(Category::class);
     }
 }
 
