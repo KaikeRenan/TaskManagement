@@ -3,54 +3,48 @@
 namespace Modules\Category\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Modules\Category\Http\Requests\CategoryStoreRequest;
+use Modules\Category\Http\Requests\CategoryUpdateRequest;
+use Modules\Category\Services\CategoryService;
+use Modules\Category\Transformers\CategoryCollection;
+use Modules\Category\Transformers\CategoryResource;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        protected CategoryService $categoryService
+    )
+    {
+    }
+
     public function index()
     {
-        return view('category::index');
+        $categories = $this->categoryService->getAll();
+        return new CategoryCollection($categories);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(int $category)
     {
-        return view('category::create');
+        $category = $this->categoryService->getById($category);
+        return new CategoryResource($category);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function store(CategoryStoreRequest $request)
     {
-        return view('category::show');
+        $category = $this->categoryService->create($request->validated());
+        return new CategoryResource($category);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(CategoryUpdateRequest $request, int $category)
     {
-        return view('category::edit');
+        $category = $this->categoryService->update($category, $request->validated());
+        return new CategoryResource($category);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+    public function destroy(int $category)
+    {
+        $this->categoryService->delete($category);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+        return response()->noContent();
+    }
 }
